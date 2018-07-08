@@ -81,6 +81,8 @@ public class SoftKeyboard extends InputMethodService
     private LatinKeyboard mSymbolsKeyboard;
     private LatinKeyboard mSymbolsShiftedKeyboard;
     private LatinKeyboard mQwertyKeyboard;
+    private LatinKeyboard mProvatKeyboard;
+    private LatinKeyboard mProvatShiftedKeyboard;
     
     private LatinKeyboard mCurKeyboard;
     
@@ -120,6 +122,9 @@ public class SoftKeyboard extends InputMethodService
         mQwertyKeyboard = new LatinKeyboard(this, R.xml.qwerty);
         mSymbolsKeyboard = new LatinKeyboard(this, R.xml.symbols);
         mSymbolsShiftedKeyboard = new LatinKeyboard(this, R.xml.symbols_shift);
+        mProvatKeyboard = new LatinKeyboard(this, R.xml.provat);
+        mProvatShiftedKeyboard = new LatinKeyboard(this, R.xml.provat_shift);
+
     }
     
     /**
@@ -138,9 +143,9 @@ public class SoftKeyboard extends InputMethodService
     }
 
     private void setLatinKeyboard(LatinKeyboard nextKeyboard) {
-        final boolean shouldSupportLanguageSwitchKey =
+        //final boolean shouldSupportLanguageSwitchKey =
                 mInputMethodManager.shouldOfferSwitchingToNextInputMethod(getToken());
-        nextKeyboard.setLanguageSwitchKeyVisibility(shouldSupportLanguageSwitchKey);
+        //nextKeyboard.setLanguageSwitchKeyVisibility(shouldSupportLanguageSwitchKey);
         mInputView.setKeyboard(nextKeyboard);
     }
 
@@ -553,9 +558,11 @@ public class SoftKeyboard extends InputMethodService
             Keyboard current = mInputView.getKeyboard();
             if (current == mSymbolsKeyboard || current == mSymbolsShiftedKeyboard) {
                 setLatinKeyboard(mQwertyKeyboard);
-            } else {
+            } else if(current == mQwertyKeyboard){
                 setLatinKeyboard(mSymbolsKeyboard);
                 mSymbolsKeyboard.setShifted(false);
+            }else if (current == mProvatKeyboard){
+                //setLatinKeyboard(mSymbolsKeyboard);
             }
         } else {
             handleCharacter(primaryCode, keyCodes);
@@ -645,6 +652,15 @@ public class SoftKeyboard extends InputMethodService
             mSymbolsShiftedKeyboard.setShifted(false);
             setLatinKeyboard(mSymbolsKeyboard);
             mSymbolsKeyboard.setShifted(false);
+        }else if (currentKeyboard == mProvatKeyboard){
+            mProvatKeyboard.setShifted(true);
+            setLatinKeyboard(mProvatShiftedKeyboard);
+            mProvatShiftedKeyboard.setShifted(true);
+        }else if (currentKeyboard == mProvatShiftedKeyboard){
+            mProvatShiftedKeyboard.setShifted(false);
+            setLatinKeyboard(mProvatKeyboard);
+            mProvatKeyboard.setShifted(false);
+
         }
     }
     
@@ -685,7 +701,13 @@ public class SoftKeyboard extends InputMethodService
     }
 
     private void handleLanguageSwitch() {
-        mInputMethodManager.switchToNextInputMethod(getToken(), false /* onlyCurrentIme */);
+        //mInputMethodManager.switchToNextInputMethod(getToken(), false /* onlyCurrentIme */);
+        Keyboard currentKeyboard = mInputView.getKeyboard();
+        if (mQwertyKeyboard == currentKeyboard){
+            setLatinKeyboard(mProvatKeyboard);
+        }else if(mProvatKeyboard == currentKeyboard){
+            setLatinKeyboard(mQwertyKeyboard);
+        }
     }
 
     private void checkToggleCapsLock() {
